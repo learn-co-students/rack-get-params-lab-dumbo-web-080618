@@ -1,6 +1,8 @@
+require 'pry'
 class Application
 
   @@items = ["Apples","Carrots","Pears"]
+  @@cart = []
 
   def call(env)
     resp = Rack::Response.new
@@ -13,6 +15,23 @@ class Application
     elsif req.path.match(/search/)
       search_term = req.params["q"]
       resp.write handle_search(search_term)
+    elsif req.path.match(/cart/)
+      if @@cart.length > 0
+        @@cart.each do |item|
+          resp.write "#{item}\n"
+        end
+      else
+        resp.write "Your cart is empty"
+      end
+    elsif req.path.match(/add/)
+      find_me = req.params['item']
+      #currently the value of find_me is nil which is why my if statement is not running properly
+      if @@items.include?(find_me)
+        @@cart << find_me
+        resp.write "added #{find_me}"
+      else
+        resp.write "We don't have that item"
+      end
     else
       resp.write "Path Not Found"
     end
